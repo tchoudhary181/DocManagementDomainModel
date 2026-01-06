@@ -1,44 +1,112 @@
 from domain.user import User
 from domain.document import Document
 from domain.document_store import DocumentStore
+from domain.user_store import UserStore
+from data.persistence import (
+    save_users, load_users,
+    save_documents, load_documents
+)
 
-alice = User("u1", "Alice")
-bob = User("u2", "Bob")
-charlie = User("u3", "Charlie")
 
-# Create documents
-doc1 = Document("d1", "Notes", "Python OOP basics", alice.get_id())
-doc2 = Document("d2", "Todo", "Finish assignment", bob.get_id())
-doc3 = Document("d3", "Maths Notes", "Start assignment", charlie.get_id())
+def main():
+    user_store = UserStore()
+    document_store = DocumentStore()
 
-store = DocumentStore()
-store.add_document(doc1)
-store.add_document(doc2)
-store.add_document(doc3)
+    load_users(user_store)
+    load_documents(document_store)
 
-# Read a document
-print(store.get_document("d1").read())
-print(store.get_document("d2").read())
-print(store.get_document("d3").read())
+    while True:
+        print("\n--- Document Management System ---")
+        print("1. Add user")
+        print("2. Delete user")
+        print("3. Create document")
+        print("4. Read document")
+        print("5. Update document")
+        print("6. Delete document")
+        print("7. List users")
+        print("8. Exit")
 
-# List documents by user
-alice_docs = store.get_documents_by_user("u1")
-for doc in alice_docs:
-    print(doc.get_title())
+        choice = input("Choose: ").strip()
 
-bob_docs = store.get_documents_by_user("u2")
-for doc in bob_docs:
-    print(doc.get_title())
-        
-charlie_docs = store.get_documents_by_user("u3")
-for doc in charlie_docs:
-    print(doc.get_title())
+        # Add user
+        if choice == "1":
+            uid = input("User ID: ")
+            name = input("Name: ")
+            try:
+                user_store.add_user(User(uid, name))
+                save_users(user_store)
+                print("User added.")
+            except ValueError as e:
+                print(e)
 
-# update document
-store.update_document("d2", "Bob's changes")
-print("\nUpdated d2:")
-print(store.get_document("d2").read())
+        # Delete user
+        elif choice == "2":
+            uid = input("User ID to delete: ")
+            try:
+                user_store.remove_user(uid)
+                save_users(user_store)
+                print("User deleted.")
+            except KeyError as e:
+                print(e)
 
-#remove document
-store.remove_document("d1")
-print("\nd1 removed successfully")
+        # Create document
+        elif choice == "3":
+            doc_id = input("Document ID: ")
+            title = input("Title: ")
+            content = input("Content: ")
+            owner = input("Owner ID: ")
+
+            if not user_store.user_exists(owner):
+                print("User does not exist.")
+                continue
+
+            document_store.add_document(
+                Document(doc_id, title, content, owner)
+            )
+            save_documents(document_store)
+            print("Document created.")
+
+        # Read document
+        elif choice == "4":
+            doc_id = input("Document ID: ").strip()
+            try:
+                document = document_store.get_document(doc_id)
+                print("\n--- Document Content ---")
+                print(document.read())
+                print("------------------------")
+            except KeyError:
+                print("Document not found.")
+            
+
+        # Update document
+        elif choice == "5":
+            doc_id = input("Document ID: ")
+            content = input("New content: ")
+            try:
+                document_store.update_document(doc_id, content)
+                save_documents(document_store)
+                print("Document updated.")
+            except KeyError:
+                print("Document not found.")
+
+        # Delete document
+        elif choice == "6":
+            doc_id = input("Document ID: ")
+            try:
+                document_store.remove_document(doc_id)
+                save_documents(document_store)
+                print("Document deleted.")
+            except KeyError:
+                print("Document not found.")
+
+        elif choice == "7":
+            for u in user_store.list_users():
+                print(f"{u.get_id()} - {u.get_name()}")
+
+        elif choice == "8":
+            print("Goodbye!")
+            break
+
+
+if __name__ == "__main__":
+    main()

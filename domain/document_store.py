@@ -1,28 +1,52 @@
+from typing import Dict, List
+from uuid import UUID
+
+from domain.user import User
+from domain.document import Document
+
+
+
 class DocumentStore:
+    """
+    Acts as an in-memory repository.
+    Later phases will replace this with a DB layer.
+    """
+
     def __init__(self):
-        self._documents = {}
+        self._users: Dict[UUID, User] = {}
+        self._documents: Dict[UUID, Document] = {}
 
-    def add_document(self, document):
-        if document.get_id() in self._documents:
-            raise ValueError("Document already exists.")
-        self._documents[document.get_id()] = document
+    # -------- User Operations --------
+    def add_user(self, user: User) -> None:
+        self._users[user.id] = user
 
-    def get_document(self, doc_id):
-        if doc_id not in self._documents:
-            raise KeyError("Document not found.")
-        return self._documents[doc_id]
+    def get_user(self, user_id: UUID) -> User:
+        user = self._users.get(user_id)
+        if not user:
+            raise UserNotFoundError("User does not exist")
+        return user
 
-    def get_documents_by_user(self, user_id):
+    # -------- Document Operations --------
+    def add_document(self, document: Document) -> None:
+        if document.owner_id not in self._users:
+            raise UserNotFoundError("Cannot create document for unknown user")
+        self._documents[document.id] = document
+
+    def get_document(self, document_id: UUID, requester_id: UUID) -> Document:
+        document = self._documents.get(document_id)
+        if not document:
+            raise DocumentNotFoundError("Document not found")
+
+        if document.owner_id != requester_id:
+            raise PermissionDeniedError("Access denied to this document")
+
+        return document
+
+    def get_user_documents(self, user_id: UUID) -> List[Document]:
+        if user_id not in self._users:
+            raise UserNotFoundError("User does not exist")
+
         return [
             doc for doc in self._documents.values()
-            if doc.get_owner() == user_id
+            if doc.owner_id == user_id
         ]
-
-    def update_document(self, doc_id, new_content):
-        document = self.get_document(doc_id)
-        document.update_content(new_content)
-
-    def remove_document(self, doc_id):
-        if doc_id not in self._documents:
-            raise KeyError("Document not found.")
-        del self._documents[doc_id]

@@ -1,12 +1,23 @@
+from uuid import UUID, uuid4
+
+
 class User:
-    def __init__(self, user_id: str, name: str):
-        self._user_id = user_id #user's id (private)
-        self._name = name #user's name (private)
-        
-    def get_id(self) -> str:
-        return self._user_id   
-   
-    def get_name(self) -> str:
+    def __init__(self, name: str, email: str):
+        self._id: UUID = uuid4()
+        self._name = name
+        self._email = email
+
+    @property
+    def id(self) -> UUID:
+        return self._id
+
+    @property
+    def name(self) -> str:
         return self._name
-   
-    
+
+    @property
+    def email(self) -> str:
+        return self._email
+
+    def __repr__(self) -> str:
+        return f"User(id={self._id}, name={self._name})"

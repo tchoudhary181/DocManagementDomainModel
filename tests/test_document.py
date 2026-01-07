@@ -9,5 +9,5 @@ def test_create_document():
 
 def test_update_document():
     doc = Document("d1", "Notes", "Old", "u1")
-    doc.update("New")
+    doc.update_content("New")
     assert doc.read() == "New"

@@ -1,34 +1,24 @@
-from uuid import UUID, uuid4
-from datetime import datetime
+class Document: 
+    def __init__ (self, doc_id:str, title:str, content:str, owner_id :str):
+        self._doc_id = doc_id  # document's id (private)
+        self._title = title    # document's title (private)
+        self._content = content # document's content (private)
+        self._owner_id  = owner_id  # document's owner id (private)
 
+    def get_id(self) -> str:
+        return self._doc_id
 
-class Document:
-    def __init__(self, owner_id: UUID, title: str, content: str):
-        self._id: UUID = uuid4()
-        self._owner_id = owner_id
-        self._title = title
-        self._content = content
-        self._created_at = datetime.utcnow()
-
-    @property
-    def id(self) -> UUID:
-        return self._id
-
-    @property
-    def owner_id(self) -> UUID:
-        return self._owner_id
-
-    @property
-    def title(self) -> str:
+    def get_title(self) -> str:
         return self._title
 
-    @property
-    def content(self) -> str:
+    def get_owner(self) -> str:
+        return self._owner_id
+
+    def read(self) -> str:
         return self._content
 
-    @property
-    def created_at(self) -> datetime:
-        return self._created_at
+    def update_content(self, new_content: str) -> None:
+        self._content = new_content
 
-    def __repr__(self) -> str:
-        return f"Document(id={self._id}, title={self._title})"
+    
+    

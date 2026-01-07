@@ -8,7 +8,7 @@ def test_user_persistence(tmp_path, monkeypatch):
     users_file = tmp_path / "users.json"
 
     monkeypatch.setattr(
-        "persistence.persistence.USERS_FILE",
+        "data.persistence.USERS_FILE",
         str(users_file)
     )
 
@@ -29,7 +29,7 @@ def test_document_persistence(tmp_path, monkeypatch):
     docs_file = tmp_path / "documents.json"
 
     monkeypatch.setattr(
-        "persistence.persistence.DOCS_FILE",
+        "data.persistence.DOCS_FILE",
         str(docs_file)
     )
 
